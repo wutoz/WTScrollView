@@ -10,6 +10,8 @@
 
 #define CHECK_IS_ZERO( x, max ) (x) == 0 ? (max) : (x)
 
+static float const timeInterval = 2.0f;
+
 @implementation UIView (WTAddtion)
 
 - (CGFloat)X{
@@ -34,8 +36,11 @@
     UIImageView *_leftImageView;
     UIImageView *_middleImageView;
     UIImageView *_rightImageView;
+    NSInteger _currentPage;
     NSInteger indexRight;
     NSInteger maxCount;
+    NSTimer *_timer;
+   
 }
 
 @property (nonatomic, strong) NSMutableArray *imageArray;
@@ -59,6 +64,15 @@
         _scrollView.userInteractionEnabled = YES;
         _scrollView.showsHorizontalScrollIndicator = NO;
         _scrollView.showsVerticalScrollIndicator = NO;
+        
+        
+        _pageControl=[[UIPageControl alloc] init];
+        
+        [self addSubview:_pageControl];
+
+        _pageControl.currentPage = 0;
+        _pageControl.currentPageIndicatorTintColor = [UIColor blackColor];
+        _pageControl.pageIndicatorTintColor = [UIColor grayColor];
       
         _imageArray = [NSMutableArray array];
         NSMutableArray *imageNameArray = [NSMutableArray array];
@@ -85,6 +99,10 @@
         
         maxCount = _imageArray.count;
         
+        _pageControl.frame = CGRectMake((self.width - maxCount * 20) / 2, self.height - 45, maxCount * 20, 30);
+        _pageControl.numberOfPages = maxCount;
+        
+        
         NSAssert(maxCount > 1, @"Two or more image elements wo needed!");
         
         _leftImageView = [[UIImageView alloc] init];
@@ -101,9 +119,23 @@
         _style = WTScrollViewStyleHorizontal;
         
         [self layImageViewInScrollView:_scrollView Style:_style];
+        
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(midViewClick)];
+        [_middleImageView addGestureRecognizer:tap];
+        _middleImageView.userInteractionEnabled = YES;
+        
+        _timer = [NSTimer timerWithTimeInterval:timeInterval target:self selector:@selector(scrollTimer) userInfo:nil repeats:YES];
+        [[NSRunLoop currentRunLoop]addTimer:_timer forMode:NSRunLoopCommonModes];
     }
     
     return self;
+}
+
+-(void)midViewClick{
+    NSLog(@"%ld",_pageControl.currentPage);
+    if(self.clickBlock){
+        self.clickBlock(_pageControl.currentPage);
+    }
 }
 
 -(void)setStyle:(WTScrollViewStyle)style{
@@ -111,22 +143,31 @@
     [self layImageViewInScrollView:_scrollView Style:_style];
 }
 
--(void)layImageViewInScrollView:(UIScrollView *)scrollView Style:(WTScrollViewStyle)style{
-    _leftImageView.frame = [self scrollViewCurrentRect:scrollView Location: WTScrollViewLocationLeft Style:style];
-    
-    _middleImageView.frame = [self scrollViewCurrentRect:scrollView Location: WTScrollViewLocationMiddle Style:style];
-    
-    _rightImageView.frame = [self scrollViewCurrentRect:scrollView Location: WTScrollViewLocationRight Style:style];
-    
-    if(style == WTScrollViewStyleHorizontal)
-        [scrollView setContentSize:CGSizeMake(scrollView.width * maxCount, scrollView.height)];
-    else
-        [scrollView setContentSize:CGSizeMake(scrollView.width, scrollView.height * maxCount)];
-    
-    [scrollView scrollRectToVisible:[self scrollViewCurrentRect:scrollView Location: WTScrollViewLocationMiddle Style:style] animated: NO];
+#pragma mark - UIScrollView methods
+
+-(void)scrollTimer{
+    [_scrollView scrollRectToVisible:[self scrollViewCurrentRect:_scrollView Location: WTScrollViewLocationRight Style:self.style] animated:YES];
+}
+
+//-(void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
+//    [_timer setFireDate:[NSDate distantFuture]];
+//}
+//
+//-(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
+//    [_timer setFireDate:[NSDate date]];
+//}
+
+-(void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView{
+    [self refreshScrollViewStatus:scrollView];
 }
 
 -(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
+    [self refreshScrollViewStatus:scrollView];
+}
+
+#pragma mark - private methods
+
+-(void)refreshScrollViewStatus:(UIScrollView *)scrollView{
     NSInteger currentPage = 0;
     if(self.style == WTScrollViewStyleHorizontal)
         currentPage = floor(scrollView.contentOffset.x / scrollView.width);
@@ -148,11 +189,34 @@
     
     index = CHECK_IS_ZERO((maxCount + indexRight % maxCount + 1) % maxCount, maxCount);
     _middleImageView.image = self.imageArray[(index - 1)];
+    _pageControl.currentPage = index - 1;
     
     index = CHECK_IS_ZERO((maxCount + indexRight % maxCount + 2) % maxCount, maxCount);
     _rightImageView.image = self.imageArray[(index - 1)];
     
     [scrollView scrollRectToVisible:[self scrollViewCurrentRect:scrollView Location: WTScrollViewLocationMiddle Style:self.style] animated:NO];
+}
+
+-(void)layImageViewInScrollView:(UIScrollView *)scrollView Style:(WTScrollViewStyle)style{
+    _leftImageView.frame = [self scrollViewCurrentRect:scrollView Location: WTScrollViewLocationLeft Style:style];
+    
+    _middleImageView.frame = [self scrollViewCurrentRect:scrollView Location: WTScrollViewLocationMiddle Style:style];
+    
+    _rightImageView.frame = [self scrollViewCurrentRect:scrollView Location: WTScrollViewLocationRight Style:style];
+    
+    if(style == WTScrollViewStyleHorizontal){
+        [scrollView setContentSize:CGSizeMake(scrollView.width * maxCount, scrollView.height)];
+        [_pageControl setFrame:CGRectMake((self.width - maxCount * 20) / 2, self.height - 45, maxCount * 20, 30)];
+        _pageControl.transform = CGAffineTransformRotate(_pageControl.transform, 0);
+    }
+    else{
+        [scrollView setContentSize:CGSizeMake(scrollView.width, scrollView.height * maxCount)];
+        [_pageControl setFrame:CGRectMake((self.width - 45), (self.height - maxCount * 20) / 2, 30, maxCount * 20)];
+        _pageControl.transform = CGAffineTransformRotate(_pageControl.transform, M_PI/2);
+    }
+    
+    
+    [scrollView scrollRectToVisible:[self scrollViewCurrentRect:scrollView Location: WTScrollViewLocationMiddle Style:style] animated: NO];
 }
 
 -(CGRect)scrollViewCurrentRect:(UIScrollView *)scrollView Location:(WTScrollViewLocation)location Style:(WTScrollViewStyle)style{

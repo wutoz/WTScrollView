@@ -446,6 +446,7 @@
 				D801781B1A4FE150009ACB03 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		D801781C1A4FE150009ACB03 /* Build configuration list for PBXNativeTarget "WTScrollViewTests" */ = {
 			isa = XCConfigurationList;
@@ -454,6 +455,7 @@
 				D801781E1A4FE150009ACB03 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

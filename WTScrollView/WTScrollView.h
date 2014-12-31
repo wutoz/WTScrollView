@@ -37,6 +37,8 @@ typedef NS_ENUM(NSInteger, WTScrollViewStyle) {
 
 @property (nonatomic, assign) WTScrollViewStyle style;
 
+@property (nonatomic, strong) void (^clickBlock)(NSInteger index);
+
 @end
 
 
