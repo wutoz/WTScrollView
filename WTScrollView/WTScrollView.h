@@ -33,7 +33,7 @@ typedef NS_ENUM(NSInteger, WTScrollViewStyle) {
 
 @interface WTScrollView : UIView
 
-- (instancetype)initWithFrame:(CGRect)frame ImageName:(NSString *)imageName, ... NS_REQUIRES_NIL_TERMINATION;
+- (instancetype)initWithFrame:(CGRect)frame imageName:(NSString *)imageName, ... NS_REQUIRES_NIL_TERMINATION;
 
 @property (nonatomic, assign) WTScrollViewStyle style;
 

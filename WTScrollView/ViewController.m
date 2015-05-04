@@ -34,9 +34,12 @@
 
 
 -(void)initWTView{
-    WTScrollView *testView = [[WTScrollView alloc] initWithFrame:CGRectMake(0, 0, UIScreenWidth, UIScreenHeight) ImageName:@"pic1",@"pic2",@"pic3",@"pic4",@"pic5",@"pic6",@"pic7", nil];
+    WTScrollView *WTView = [[WTScrollView alloc] initWithFrame:CGRectMake(0, 0, UIScreenWidth, UIScreenHeight) imageName:@"pic1",@"pic2",@"pic3",@"pic4",@"pic5",@"pic6",@"pic7", nil];
 //        testView.style = WTScrollViewStyleVertical;
-    [self.view addSubview:testView];
+    WTView.clickBlock = ^(NSInteger index){
+        NSLog(@"click %ld",index);
+    };
+    [self.view addSubview:WTView];
 }
 
 -(void)initView{

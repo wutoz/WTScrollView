@@ -12,6 +12,8 @@
 
 static float const timeInterval = 2.0f;
 
+static float const pageControlEdge = 20.0f;
+
 @implementation UIView (WTAddtion)
 
 - (CGFloat)X{
@@ -40,7 +42,6 @@ static float const timeInterval = 2.0f;
     NSInteger indexRight;
     NSInteger maxCount;
     NSTimer *_timer;
-   
 }
 
 @property (nonatomic, strong) NSMutableArray *imageArray;
@@ -53,7 +54,7 @@ static float const timeInterval = 2.0f;
 
 @implementation WTScrollView
 
-- (instancetype)initWithFrame:(CGRect)frame ImageName:(NSString *)imageName, ...{
+- (instancetype)initWithFrame:(CGRect)frame imageName:(NSString *)imageName, ...{
     if(self = [super initWithFrame:frame]){
         _scrollView = [[UIScrollView alloc] initWithFrame:frame];
         [self addSubview:_scrollView];
@@ -99,10 +100,9 @@ static float const timeInterval = 2.0f;
         
         maxCount = _imageArray.count;
         
-        _pageControl.frame = CGRectMake((self.width - maxCount * 20) / 2, self.height - 45, maxCount * 20, 30);
+        _pageControl.frame = CGRectMake(self.width / 2, self.height - pageControlEdge, 0, 0);
         _pageControl.numberOfPages = maxCount;
-        
-        
+    
         NSAssert(maxCount > 1, @"Two or more image elements wo needed!");
         
         _leftImageView = [[UIImageView alloc] init];
@@ -132,7 +132,6 @@ static float const timeInterval = 2.0f;
 }
 
 -(void)midViewClick{
-    NSLog(@"%ld",_pageControl.currentPage);
     if(self.clickBlock){
         self.clickBlock(_pageControl.currentPage);
     }
@@ -206,15 +205,14 @@ static float const timeInterval = 2.0f;
     
     if(style == WTScrollViewStyleHorizontal){
         [scrollView setContentSize:CGSizeMake(scrollView.width * maxCount, scrollView.height)];
-        [_pageControl setFrame:CGRectMake((self.width - maxCount * 20) / 2, self.height - 45, maxCount * 20, 30)];
+        [_pageControl setFrame:CGRectMake(self.width / 2, self.height - pageControlEdge, 0, 0)];
         _pageControl.transform = CGAffineTransformRotate(_pageControl.transform, 0);
     }
     else{
         [scrollView setContentSize:CGSizeMake(scrollView.width, scrollView.height * maxCount)];
-        [_pageControl setFrame:CGRectMake((self.width - 45), (self.height - maxCount * 20) / 2, 30, maxCount * 20)];
+        [_pageControl setFrame:CGRectMake(self.width - pageControlEdge, self.height / 2, 0, 0)];
         _pageControl.transform = CGAffineTransformRotate(_pageControl.transform, M_PI/2);
     }
-    
     
     [scrollView scrollRectToVisible:[self scrollViewCurrentRect:scrollView Location: WTScrollViewLocationMiddle Style:style] animated: NO];
 }
